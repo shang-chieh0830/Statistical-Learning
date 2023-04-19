@@ -1,0 +1,336 @@
+---
+jupyter:
+  jupytext:
+    formats: ipynb,Rmd,R
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.2'
+      jupytext_version: 1.9.1
+  kernelspec:
+    display_name: R
+    language: R
+    name: ir
+---
+
+# Lab 1
+
+This is loosely based on notes by Dr. Leemis: [here](http://www.math.wm.edu/~leemis/r.pdf). If you're not familiar with `r` I highly recommend you go through this. 
+
+## Notebook basics
+
+Code notebooks allow interweaving of 
+
+1. rich-text input (html, markdown, etc.)
+2. code input
+3. code output
+
+```{r}
+print('hello darkness my old friend')
+```
+
+![sound of silence](https://upload.wikimedia.org/wikipedia/commons/e/e5/SimonandGarfunkel.jpg)
+
+We can write notebooks using a couple different IDEs, popular being 
+
+1. [jupyter](https://jupyter.org/install) which is a bit more advanced and requires installing [anaconda](https://www.anaconda.com/)
+
+2. [rstudio](https://rstudio.com/products/rstudio/)
+
+either can be used to write code in [R](https://www.r-project.org/)
+
+
+## R as a calculator
+
+We can use R as a calculator
+
+```{r}
+1+1
+```
+
+```{r}
+1+2*5
+```
+
+there are also some built-in constants in R
+
+```{r}
+pi
+exp(1)
+```
+
+there are also special infinite values
+
+```{r}
+1/0
+-1/0
+0/0
+```
+
+to denote nothing we have
+
+```{r}
+NULL
+```
+
+to denote a missing value
+
+```{r}
+NA
+```
+
+
+# Variable assignment and simple objects
+
+One can assign variables with either an `=` or `<-`
+
+```{r}
+x = 1
+x
+```
+
+```{r}
+x <- 1
+x
+```
+
+## Vectors
+
+vectors are made with the `c` command
+
+```{r}
+x = c(5, 3, 7)
+x
+```
+
+we get the elements with `[]`
+
+```{r}
+x[1]
+```
+
+negative numbers selects all but those elements
+
+
+```{r}
+x[c(-1,-2)]
+```
+
+
+we can make a vector out of any type
+
+```{r}
+truths <- c(TRUE, FALSE, TRUE)
+truths
+```
+
+if we subset by boolean then it select those elements with `TRUE`
+
+```{r}
+x
+```
+
+```{r}
+truths
+```
+
+```{r}
+x[truths]
+```
+
+we can make consecutive integers using:
+
+```{r}
+1:10
+```
+
+or the `seq` function
+
+```{r}
+seq(1, 20, by=3)
+```
+
+## matrices
+
+we can make a matrix using the ``matrix`` function
+
+```{r}
+X <- matrix(1:25,nrow=5,byrow=TRUE)
+X
+```
+or the `array` function
+
+```{r}
+Y <- array(25:49, c(5,5))
+Y
+```
+matrix multiplication is done with the operator ``%*%``
+
+```{r}
+X %*% Y
+```
+
+I can extract or assign individual elements with `[,]`
+
+```{r}
+X[1,2]
+```
+
+```{r}
+X[1,2] <- 3
+X
+```
+
+or entire rows/columns as follows
+
+```{r}
+X[,1]
+```
+
+```{r}
+X[1,]
+```
+
+
+# Flow Control
+
+if statements are as follows
+
+```{r}
+A = 5
+if(A==0){
+    print("A=0")
+} else if(A == 1){
+    print("A=1")
+} else if(A==2) {
+    print("A=2")
+} else {
+    print("A is not 0, 1 or 2")
+}
+```
+
+we can also make `for` loops
+
+```{r}
+for(i in 1:10){
+  print(i)
+}
+```
+
+and `while` loops
+
+```{r}
+i=1
+while(i <= 10){
+  print(i)
+  i = i+1
+}
+```
+
+# major types
+
+numeric
+
+```{r}
+c(1,2,3)
+```
+
+```{r}
+class(c(1,2,3))
+```
+
+strings
+
+```{r}
+c('hello','darkness','my','old','friend')
+```
+
+
+```{r}
+class(c('hello','darkness','my','old','friend'))
+```
+
+boolean
+
+```{r}
+c(TRUE,FALSE)
+```
+
+```{r}
+class(c(TRUE,FALSE))
+```
+
+factors for discrete variables
+
+```{r}
+fctr = as.factor(c("hello", "darkness"))
+```
+
+```{r}
+fctr
+```
+
+```{r}
+class(fctr)
+```
+
+```{r}
+as.numeric(fctr)
+```
+
+```{r}
+fctr*2
+```
+
+# data-frames and matrices:
+
+matrcies all have to be the same type:
+
+```{r}
+X = array(0, c(5,5))
+X
+```
+
+```{r}
+X = array(LETTERS[1:25], c(5, 5))
+X
+```
+
+so if I have a character `X` and I assign the number `5` to the first column, what happens?
+
+```{r}
+X[,1] = rep(5,5)
+X
+```
+```{r}
+X[,1]
+```
+
+this is not the number `5`, its the character `'5'`
+
+The proper way to have mixed types is to have a `data.frame`
+
+```{r}
+df = data.frame(x=rep(5,5),y=LETTERS[1:5])
+df
+```
+
+I can access the elements like matrices
+
+```{r}
+df[1,1]
+df[1,2]
+```
+
+or with names
+
+```{r}
+df$x
+df$y
+```
+
+```{r}
+df[["x"]]
+df[["y"]]
+```
+

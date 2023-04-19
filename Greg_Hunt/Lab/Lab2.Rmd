@@ -1,0 +1,373 @@
+---
+jupyter:
+  jupytext:
+    formats: ipynb,Rmd,R
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.2'
+      jupytext_version: 1.9.1
+  kernelspec:
+    display_name: R
+    language: R
+    name: ir
+---
+
+# Lab 2 - Linear Regression
+
+# Generate some simulated data
+
+```{r}
+gen_data = function(N,P,s=1/10){
+    X = array(rnorm(N*P),c(N,P))
+    beta = array(rnorm(P+1),c(P+1,1))
+    epsilon = array(rnorm(N,sd=s),c(N,1))
+    y = cbind(1,X)%*%beta + epsilon
+    return(list(
+        X=X,beta=beta,epsilon=epsilon,y=y
+        )
+    )
+}
+
+d = gen_data(100, 1)
+```
+
+```{r}
+plot(d$X, d$y)
+```
+
+```{r}
+head(d$X)
+```
+
+```{r}
+head(d$beta)
+```
+
+
+```{r}
+head(d$y)
+```
+
+```{r}
+names(d)
+```
+
+# Fitting in `R` using `lm`
+
+```{r}
+mod = lm(d$y~d$X)
+summary(mod)
+```
+
+```{r}
+mod$coef
+```
+
+
+```{r}
+head(predict(mod))
+```
+
+```{r}
+plot(d$y, predict(mod))
+```
+
+# Calculating by hand
+
+```{r}
+D = cbind(1, d$X)
+head(D)
+```
+
+```{r}
+beta_hat = solve(t(D)%*%D)%*%t(D)%*%d$y
+beta_hat
+```
+
+# Plotting the loss
+
+```{r}
+L = function(beta){
+    sum((d$y-cbind(1,d$X)%*%beta)^2)
+}
+```
+
+```{r}
+beta_grid = expand.grid(beta0=seq(-3,3,by=.1),beta1=seq(-3,3,by=.1))
+```
+
+```{r}
+head(beta_grid)
+```
+
+```{r}
+library('ggplot2')
+ggplot(data=beta_grid,mapping=aes(x=beta0,y=beta1))+geom_point()
+```
+
+```{r}
+beta_grid$L = apply(beta_grid,1,L)
+```
+
+```{r}
+head(beta_grid)
+```
+
+```{r}
+library('ggplot2')
+library('viridis')
+```
+
+```{r}
+beta_hat_df = data.frame(beta0=beta_hat[1],beta1=beta_hat[2])
+```
+
+```{r}
+ggplot(data=beta_grid,mapping=aes(x=beta0,y=beta1,fill=L,z=L))+geom_tile()+
+    scale_fill_viridis()+geom_contour()+
+    geom_point(data=beta_hat_df,mapping=aes(x=beta0,y=beta1),inherit.aes=FALSE,color='red',size=5)
+```
+
+# Categorial variables
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/South_Shetland-2016-Deception_Island%E2%80%93Chinstrap_penguin_%28Pygoscelis_antarctica%29_04.jpg/800px-South_Shetland-2016-Deception_Island%E2%80%93Chinstrap_penguin_%28Pygoscelis_antarctica%29_04.jpg" width="200" height="500">
+
+
+```{r}
+library('palmerpenguins')
+```
+
+```{r}
+penguins = penguins[complete.cases(penguins),]
+```
+
+```{r}
+head(penguins[sample(nrow(penguins)),])
+```
+
+```{r}
+mod = lm(flipper_length_mm~bill_length_mm+species,data=penguins)
+summary(penguins)
+```
+
+```{r}
+summary(mod)
+```
+
+```{r}
+D = model.matrix(~bill_length_mm+species,data=penguins)
+head(D[sample(nrow(D)),])
+```
+
+```{r}
+y = penguins$flipper_length_mm
+y = array(y,c(length(y),1))
+head(y)
+```
+
+```{r}
+beta_hat = solve(t(D)%*%D)%*%t(D)%*%y
+beta_hat
+```
+
+```{r}
+coef(mod)
+```
+
+# Fitting Issues
+
+```{r}
+d = gen_data(100, 200)
+dim(d$X)
+```
+
+```{r}
+mod = lm(d$y~d$X)
+summary(mod)
+```
+
+```{r}
+tail(coef(mod))
+```
+
+```{r}
+D = model.matrix(mod)
+D[1:5,1:5]
+```
+
+```{r}
+# singular
+# solve(t(D)%*%D)%*%t(D)%*%d$y
+```
+
+another example
+
+
+```{r}
+xx = rnorm(100)
+X = cbind(xx,xx)
+colnames(X) = c('V1','V2')
+head(X)
+```
+
+```{r}
+true_beta = array(c(3,5),c(2,1))
+true_beta
+```
+
+
+```{r}
+y = X %*% true_beta + rnorm(100,sd=1/10)
+mod = lm(y~X)
+summary(mod)
+```
+
+```{r}
+plot(y,predict(mod))
+```
+
+```{r}
+#singular
+D = cbind(1,X)
+# beta_hat = solve(t(D)%*%D)%*%t(D)%*%y
+```
+
+what does the loss look like?
+
+
+```{r}
+L = function(beta){
+    sum((y-X%*%beta)^2)
+}
+beta_grid = expand.grid(beta1=seq(-5,10,by=.1),beta2=seq(-5,10,by=.1))
+beta_grid$L = apply(beta_grid,1,L)
+```
+
+```{r}
+ggplot(data=beta_grid,mapping=aes(x=beta1,y=beta2,fill=L,z=L))+geom_tile()+
+    scale_fill_viridis()+geom_contour()
+```
+
+# polynomial regression
+
+```{r}
+N = 100 
+P = 1
+X = array(rnorm(N*P),c(N,P))
+```
+
+```{r}
+y = X + 5*X^2 - X^3 + rnorm(100,0,.5)
+plot(X,y)
+```
+
+```{r}
+D = cbind(1,X,X^2,X^3)
+head(D)
+```
+
+```{r}
+beta_hat = solve(t(D)%*%D)%*%t(D)%*%y
+beta_hat
+```
+
+```{r}
+xp = seq(-2,2,length.out=100)
+Dp = cbind(1,xp,xp^2,xp^3)
+y_pred = Dp%*%beta_hat
+```
+
+
+```{r}
+plot(X,y)
+lines(xp,y_pred,col='red')
+```
+
+# More example
+
+```{r}
+#install.packages('MASS')
+```
+
+```{r}
+library('MASS')
+```
+
+```{r}
+data(Boston)
+```
+
+```{r}
+dim(Boston)
+```
+
+```{r}
+Boston[1:5,]
+```
+
+```{r}
+?Boston
+```
+
+let's fit a regression to predict the median house value from the crime rate 
+
+```{r}
+plot(log(Boston$crim),log(Boston$medv))
+```
+
+`medv~crim` basically says `medv = beta0 + beta1*crim`
+
+```{r}
+mod = lm(medv~crim,data=Boston)
+mod
+```
+
+```{r}
+summary(mod)
+```
+
+```{r}
+mod$coef
+```
+
+```{r}
+plot(Boston$crim,Boston$medv)
+abline(coef=mod$coef)
+```
+
+```{r}
+X = array(Boston$crim,c(506,1))
+X = cbind(1,X)
+X
+```
+
+```{r}
+y = array(Boston$medv,c(506,1))
+```
+
+```{r}
+beta_hat = ginv(t(X)%*%X)%*%t(X)%*%y
+```
+
+```{r}
+beta_hat
+```
+
+```{r}
+y_hat_mod = predict(mod)
+head(y_hat_mod)
+```
+
+```{r}
+y_hat = X%*%beta_hat
+```
+
+```{r}
+head(y_hat)
+```
+
+```{r}
+plot(Boston$medv,y_hat)
+```
+
