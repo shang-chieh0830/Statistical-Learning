@@ -12,6 +12,7 @@ jupyter:
     display_name: R
     language: R
     name: ir
+output: pdf_document
 ---
 
 
@@ -341,7 +342,7 @@ We can use the `plot()` function to produce *scatterplots*  of the quantitative 
 #plot(cylinders, mpg)
 ```
 
-To refer to a variable, we must type the data set and the variable name  joined with a \textR{\$} symbol.
+To refer to a variable, we must type the data set and the variable name  joined with a `$` symbol.
  Alternatively, we can use the `attach()`  function in order to tell `R` to make the variables in this data frame available by name. 
 
 ```{r chunk31}

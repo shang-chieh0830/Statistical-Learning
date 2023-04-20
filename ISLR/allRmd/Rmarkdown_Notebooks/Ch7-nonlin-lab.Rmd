@@ -162,7 +162,7 @@ anova(fit.1, fit.2, fit.3)
 
 As an alternative to using hypothesis tests and ANOVA, we could choose the polynomial degree using  cross-validation, as discussed in Chapter 5.
 
-Next we consider the task of predicting whether an individual earns more than $$250{,}000$ per year. We proceed much as before, except that first we create the appropriate response vector, and then apply the `glm()` function using `family = "binomial"` in order to fit a polynomial logistic regression model.
+Next we consider the task of predicting whether an individual earns more than $250{,}000$ per year. We proceed much as before, except that first we create the appropriate response vector, and then apply the `glm()` function using `family = "binomial"` in order to fit a polynomial logistic regression model.
 
 ```{r chunk13}
 fit <- glm(I(wage > 250) ~ poly(age, 4), data = Wage,

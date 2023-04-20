@@ -11,6 +11,7 @@ jupyter:
     display_name: R
     language: R
     name: ir
+output: pdf_document
 ---
 
 # Lab 2 - Linear Regression
@@ -371,3 +372,121 @@ head(y_hat)
 plot(Boston$medv,y_hat)
 ```
 
+# More Regression
+
+```{r}
+library('MASS')
+data(Boston)
+```
+
+```{r}
+?Boston
+```
+
+```{r}
+mod = lm(medv~crim,data=Boston)
+summary(mod)
+```
+
+```{r}
+y_hat = predict(mod)
+plot(Boston$crim,y_hat)
+```
+
+```{r}
+plot(Boston$crim,Boston$medv)
+abline(coef=coef(mod),col='red')
+```
+
+# covariate transformations
+
+```{r}
+plot(log(Boston$crim),log(Boston$medv))
+```
+
+## variable transformations
+
+```{r}
+mod2 = lm(log(medv)~log(crim),data=Boston)
+```
+
+```{r}
+summary(mod2)
+```
+
+```{r}
+plot(log(Boston$crim),log(Boston$medv))
+abline(coef=coef(mod2),col='red')
+```
+
+```{r}
+plot(log(Boston$crim),log(Boston$medv))
+```
+
+```{r}
+logmedv = array(log(Boston$medv),c(506,1))
+transf_crim = log(Boston$crim)
+```
+
+```{r}
+mod3 = lm(logmedv~transf_crim)
+summary(mod3)
+```
+
+```{r}
+X = model.matrix(mod3)
+head(X)
+```
+
+```{r}
+head(log(Boston$crim))
+```
+
+```{r}
+beta_hat = ginv(t(X)%*%X)%*%t(X)%*%logmedv
+```
+
+```{r}
+coef(mod3)
+```
+
+# categorical variables
+
+```{r}
+data(birthwt)
+```
+
+```{r}
+?birthwt
+```
+
+```{r}
+head(birthwt)
+```
+
+```{r}
+head(birthwt$race)
+```
+
+```{r}
+racef = as.factor(birthwt$race)
+head(racef)
+```
+
+```{r}
+levels(racef) = c("White","Black","Other")
+```
+
+```{r}
+head(racef)
+```
+
+```{r}
+birthwt$race = racef
+mod = lm(bwt~race,data=birthwt)
+summary(mod)
+```
+
+```{r}
+head(model.matrix(mod))
+```
