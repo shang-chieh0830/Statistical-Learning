@@ -286,7 +286,7 @@ To illustrate the `read.table()` function, we load it now from a text file, `Aut
  The following command will load the `Auto.data` file into `R` and store it as an object called `Auto`,  in a format referred to as a .  Once the data has been loaded, the `View()` function can be used to view it in a spreadsheet-like window. (*This function can sometimes be a bit finicky. If you have trouble using it, then try the `head()` function instead.*) The `head()` function can also be used to view the first few rows of the data.
 
 ```{r chunk25}
-Auto <- read.table("Auto.data")
+Auto <- read.table("../data/Auto.data")
 View(Auto)
 head(Auto)
 ```
@@ -302,7 +302,7 @@ tells `R` that the first line of the file contains the variable names, and using
 be treated as a missing element of the data matrix. 
 
 ```{r chunk26}
-Auto <- read.table("Auto.data", header = T, na.strings = "?", stringsAsFactors = T)
+Auto <- read.table("../data/Auto.data", header = T, na.strings = "?", stringsAsFactors = T)
 View(Auto)
 ```
 
@@ -310,7 +310,7 @@ The `stringsAsFactors = T` argument tells `R` that any variable containing chara
 An easy way to load  data from Excel into `R` is to save it as a csv (comma-separated values) file, and then use the `read.csv()` function.
 
 ```{r chunk27}
-Auto <- read.csv("Auto.csv", na.strings = "?", stringsAsFactors = T)
+Auto <- read.csv("../data/Auto.csv", na.strings = "?", stringsAsFactors = T)
 View(Auto)
 dim(Auto)
 Auto[1:4, ]
@@ -338,7 +338,7 @@ We can use the `plot()` function to produce *scatterplots*  of the quantitative 
  because `R` does not know to look in the `Auto` data set for those variables.
 
 ```{r chunk30}
-plot(cylinders, mpg)
+#plot(cylinders, mpg)
 ```
 
 To refer to a variable, we must type the data set and the variable name  joined with a \textR{\$} symbol.

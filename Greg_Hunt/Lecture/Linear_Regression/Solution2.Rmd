@@ -1,0 +1,104 @@
+---
+title: "MATH455(Statistical Learning)- Solution2"
+author: "魏上傑"
+date: "2023-04-20"
+output:
+  pdf_document:
+    latex_engine: xelatex
+  html_document:
+    df_print: paged
+mainfont: Times New Roman
+fontsize: 12pt
+papersize: a4
+geometry: margin=1.5cm
+lang: "zh-tw"
+documentclass: ctexart
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Quiz Problem: Note that this exercise shows that the OLS estimate is essentially the MLE.
+
+sol:
+
+We use the following notation to prove the result.
+
+$X=\begin{bmatrix} 1 & x_{11} & \dots & x_{1p} \\ \vdots & \vdots  & \ddots & \vdots \\ 1 & x_{N1} & \dots & x_{Np}\end{bmatrix}$ be a $N \times (p+1)$ matrix, $Y$ be a $N\times 1$ vector, and $\beta$ be a $(p+1)\times 1$ vector.
+
+Notice that 
+\begin{align}
+\hat f &= \arg\min_{f\in\mathcal F} \frac 1N\sum_{n=1}^{N} L(y, f(x))\ &=\arg\min_{f\in\mathcal F} \frac 1N\sum_{n=1}^{N}-log(p(x,y))\ &=\arg\max_{f\in\mathcal F} \frac 1N\sum_{n=1}^{N}log(p(x,y))
+\notag
+\end{align}
+
+
+That is, we want to maximize the log-likelihood function.
+
+Also, note that
+\begin{align}
+log(p(x,y)) \propto p(x,y) &= p(y|x)p(x) \propto p(y|x)
+\notag
+\end{align}
+
+\begin{align}
+Y|X\sim N(X^T\beta, \sigma^2) \notag \\
+\implies p(Y|X) &=\frac{1}{\sqrt{2\pi}\sigma}\exp(\frac{-(Y-X\beta)^2}{2\sigma^2})\propto -(Y-X\beta)^2 \notag
+\end{align}
+
+Hence, maximize $p(Y|X) \iff$ minimize $(Y-X\beta)^2$
+
+\begin{align}
+\frac{\partial}{\partial \beta} = 0:  -2X^T(Y-X\beta) &= 0 \notag \\ \implies X^TY-X^TX\beta = 0 &\implies \hat \beta = (X^TX)^{-1}X^TY \notag
+\end{align}
+
+
+Selected Problems:
+
+7. 
+
+\begin{align}
+&Y \sim N(X\beta, \sigma^2I) \notag \\
+&\implies (X^TX)^{-1}X^TY \sim N((X^TX)^{-1}X^TX\beta, (X^TX)^{-1}X^T\sigma^2IX(X^TX)^{-1}) \notag \\
+&\implies \hat \beta \sim N(\beta, \sigma^2(X^TX)^{-1}) \notag
+\end{align} 
+
+We use the fact that $\sigma^2$ is scalar.
+
+
+8. 
+
+\begin{align}
+||y-X\beta||^2 &= (y-X\beta)^T(y-X\beta) \notag \\
+&=(y^T-\beta^TX^T)(y-X\beta) \notag \\
+&=y^Ty-y^TX\beta-\beta^TX^Ty+\beta^TX^TX\beta \notag \\
+&=y^Ty-2y^TX\beta+\beta^TX^TX\beta \notag
+\end{align}
+
+Note that $y^TX\beta$ is a scalar, so $y^TX\beta=(y^TX\beta)^T$
+
+9. 
+
+\begin{align}
+\frac{d}{d\beta}(y^Ty)=0 \notag
+\end{align}
+
+This is because $y^Ty$ does not depend on $\beta$
+
+10.
+
+\begin{align}
+\frac{d}{d\beta}(y^TX\beta)=X^Ty \notag
+\end{align}
+
+Check the dimension: $\beta$ is $(p+1)\times 1$, and $X^Ty$ is $((p+1)\times N)\times (N\times 1)=(p+1)\times 1$
+
+11.
+
+\begin{align}
+\frac{d}{d\beta}(\beta^TX^TX\beta)=2(X^TX)\beta \notag
+\end{align}
+
+Check the dimension: $\beta$ is (p+1)x1, and $(X^TX)\beta$ is $((p+1)\times N)\times (N\times (p+1))\times ((p+1)\times 1)=(p+1)\times 1$
