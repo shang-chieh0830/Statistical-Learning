@@ -1,0 +1,97 @@
+---
+title: "STA 5820 Chapter 2 lab: Introduction to R"
+author: "魏上傑"
+date: "2023-04-21"
+
+output:
+  pdf_document:
+    latex_engine: xelatex
+
+
+  
+mainfont: "Times New Roman"  # 指定英文字型
+fontsize: "12pt"
+papersize: "a4"
+geometry: "margin=1.5cm"
+lang: "zh-tw"
+documentclass: ctexart
+
+---
+
+# contour plots, heat maps, 3D plots, box plots, pairwise scatter plots
+
+```{r}
+x <- 1:10
+y <- x
+f <- function(x,y) x^2+y^2
+g <- function(x,y) cos(y)/(1+x^2)
+fxy <- outer(x,y,f) # f(x,y) for all pairs of (x,y)
+gxy <- outer(x,y,g) # g(x,y) for all pairs of (x,y)
+
+contour(x,y,fxy) # contour plot
+contour(x,y,gxy, nlevels=20, add=T) # add to existing plot, 20 lines
+```
+
+```{r}
+image(x,y,fxy) # heat map (e.g., gradation)
+```
+
+```{r}
+persp(x, y, fxy) # 3D graph
+```
+
+
+```{r}
+library(ISLR) # for "Auto" data
+str(Auto)
+```
+
+```{r}
+attach(Auto)
+plot(cylinders, mpg)
+```
+
+```{r}
+F.cylinders <- as.factor(cylinders)
+plot(F.cylinders, mpg) # boxplot
+```
+
+```{r}
+plot(F.cylinders, mpg, varwidth=T) # width proportional to num of obs
+```
+
+```{r}
+plot(F.cylinders, mpg, horizontal=T) # horizontal boxplot
+```
+
+```{r}
+pairs(~mpg+ displacement+horsepower+weight+acceleration, Auto)
+pairs(Auto[,c(1,3,4,5,6)]) # same as above
+```
+
+```{r}
+detach(Auto)
+heatmap(cor(Auto[,c(1,3,4,5,6)])) # correlogram (= correlation heatmap)
+library(ggplot2)
+```
+
+
+
+```{r}
+library(GGally) # ggpairs, ggcorr
+```
+
+```{r}
+ggpairs(Auto[,c(1,3,4,5,6)]) #pairwise plot
+```
+
+```{r}
+ggcorr(Auto[,c(1,3,4,5,6)]) # correlation heatmap
+```
+
+```{r}
+# type this code in console
+plot(Auto$horsepower, Auto$mpg)
+identify(Auto$horsepower, Auto$mpg, Auto$name) # show name of clicked obs on plot
+```
+

@@ -12,6 +12,7 @@ jupyter:
     display_name: R
     language: R
     name: ir
+output: pdf_document
 ---
 
 # Lab: Non-linear Modeling
@@ -105,8 +106,7 @@ tests. We now fit models ranging from linear to a degree-5 polynomial
 and seek to determine the simplest model which is sufficient to
 explain the relationship 
 between `wage` and `age`. We use the
-`anova()` function, which performs an \define{analysis of
-  variance} (ANOVA, using an F-test) in order to test the null
+`anova()` function, which performs an _analysis of variance_ (ANOVA, using an F-test) in order to test the null
 hypothesis that a model $\mathcal{M}_1$ is sufficient to explain the
 data against the alternative hypothesis that a more complex model
 $\mathcal{M}_2$ is required. In order to use the `anova()`
@@ -228,7 +228,7 @@ coef(summary(fit))
 ```
 
 Here `cut()` automatically picked the cutpoints at $33.5$, $49$, and $64.5$~years of age. We could also have specified our own cutpoints directly using the `breaks` option.
-The function `cut()` returns an ordered categorical variable ; the `lm()` function then creates a set of dummy variables for use in the regression. The `age < 33.5` category is left out, so the intercept coefficient of $$94{,}160$ can be interpreted as the average salary for those under $33.5$~years of age, and the other coefficients can be interpreted as the average additional salary for those in the other age groups.
+The function `cut()` returns an ordered categorical variable ; the `lm()` function then creates a set of dummy variables for use in the regression. The `age < 33.5` category is left out, so the intercept coefficient of $94{,}160$ can be interpreted as the average salary for those under $33.5$~years of age, and the other coefficients can be interpreted as the average additional salary for those in the other age groups.
 We can produce predictions and plots just as we did in the case of the polynomial fit.
 
 
@@ -347,8 +347,8 @@ plot(gam.m3, se = TRUE, col = "blue")
 The generic `plot()` function recognizes that `gam.m3` is an
 object of class `Gam`, and invokes the appropriate
 `plot.Gam()` method.  Conveniently, even though
-  `gam1` is not of class `Gam` but rather of class `lm`, we can {\em
-  still} use `plot.Gam()` on it.  Figure 7.11 was produced using the following expression:
+  `gam1` is not of class `Gam` but rather of class `lm`, we can 
+  still use `plot.Gam()` on it.  Figure 7.11 was produced using the following expression:
 
 ```{r chunk27}
 plot.Gam(gam1, se = TRUE, col = "red")

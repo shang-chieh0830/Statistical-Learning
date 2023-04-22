@@ -12,6 +12,7 @@ jupyter:
     display_name: R
     language: R
     name: ir
+output: pdf_document
 ---
 
 
@@ -316,7 +317,7 @@ coef(reg.best, 10)
 
 We will use the `glmnet` package in order to perform ridge regression and the lasso.
 The main function in this package is `glmnet()`, which can be used to fit ridge regression models, lasso models, and more.
-This function has slightly different syntax from other model-fitting functions that we have encountered thus far in this book. In particular, we must pass in an `x` matrix as well as a `y` vector, and we do not use the {\R{y $\sim$ x}} syntax. We will now perform ridge regression and the lasso in order to predict `Salary` on the `Hitters` data. Before proceeding ensure that the missing values have been removed from the data, as described in Section 6.5.1.
+This function has slightly different syntax from other model-fitting functions that we have encountered thus far in this book. In particular, we must pass in an `x` matrix as well as a `y` vector, and we do not use the `y ~ x` syntax. We will now perform ridge regression and the lasso in order to predict `Salary` on the `Hitters` data. Before proceeding ensure that the missing values have been removed from the data, as described in Section 6.5.1.
 
 
 ```{r chunk25}

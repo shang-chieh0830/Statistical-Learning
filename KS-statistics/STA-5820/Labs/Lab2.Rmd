@@ -1,0 +1,161 @@
+---
+title: "STA 5820 Chapter 3 lab: Linear Regression"
+author: "魏上傑"
+date: "2023-04-22"
+
+output:
+  pdf_document:
+    latex_engine: xelatex
+
+
+  
+mainfont: "Times New Roman"  # 指定英文字型
+fontsize: "12pt"
+papersize: "a4"
+geometry: "margin=1.5cm"
+lang: "zh-tw"
+documentclass: ctexart
+
+---
+
+Some supplemental codes for linear models.
+
+# Boston Data set
+
+```{r}
+library(MASS) # Boston data
+head(Boston) # median value of homes by town
+```
+
+```{r}
+# see help for definition of variables
+attach(Boston) 
+```
+
+# Scatter plot for crime rate vs. median house value
+
+```{r}
+plot(crim, medv)
+```
+
+```{r}
+hist(crim, breaks = seq(0, 90, 5))
+```
+
+```{r}
+hist(medv, breaks = seq(0,50,5))
+```
+
+The crime rate is a skewed right, and needs a concave transformation to make the relationship between the two variables more linear.
+
+```{r}
+plot(log(crim), medv)
+```
+
+While the median house values seem to be truncated at 50 ($50,000), the crime rate and the median house value has roughly a linear relationship.
+
+# Fitting a linear model
+
+```{r}
+LM1 <- lm(medv~ log(crim))
+summary(LM1)
+```
+
+$medv =-1.93 log(crim) +21 +\epsilon$
+
+$e^{medv}=crim\times e^{-1.93}$
+
+```{r}
+# confidence band, prediction band
+confint(LM1, level = 0.99) # 99% confidence interval (default=95%)
+```
+
+```{r}
+CI <- predict(LM1, interval="confidence") # confidence interval
+head(CI)
+```
+
+```{r}
+PI <- predict(LM1, interval = "prediction") #prediction interval
+head(PI)
+```
+
+```{r}
+ORD <- order(crim) # index for crim in increasing order
+head(ORD)
+```
+
+```{r}
+plot(log(crim), medv, ylim = c(-10, 60))
+matlines(log(crim)[ORD], CI[ORD,], type="l", col=c(1,2,2), lty=c(1,2,2))
+matlines(log(crim)[ORD], PI[ORD,], type="l", col=c(1,3,3), lty=c(1,2,2))
+```
+
+Roughly 95% of the observations are within the prediction bands (green). As there are many (506) observations, the confidence band (red) is narrow, indicating that the estimated regression line (black) is reasonably accurate.
+
+# leverage
+
+```{r}
+# plot and leverage
+hist(hatvalues(LM1))
+```
+
+```{r}
+sort(hatvalues(LM1))[501:506] # 6 largest hat values
+
+```
+There are no extreme hatvalues, compared to the others.
+
+
+```{r}
+which.max(hatvalues(LM1)) # point with largest leverage
+```
+
+```{r}
+MAX3 <- order(hatvalues(LM1))[504:506] # points with 3 largest leverages
+MAX3
+```
+
+
+
+```{r}
+library(car) # for pointLabel 
+```
+
+```{r}
+plot(log(crim), medv)
+pointLabel(x=log(crim)[MAX3], y=medv[MAX3], labels = as.character(MAX3))
+```
+
+```{r}
+plot(dis, medv)
+```
+
+```{r}
+plot(nox, medv)
+```
+
+```{r}
+# ANOVA (Analysis of Variance)
+LM2 <- lm(medv~ log(crim)+dis+nox)
+summary(LM2)
+```
+
+```{r}
+anova(LM2)
+```
+
+```{r}
+LM2b <- lm(medv~ log(crim)+dis+nox) 
+# change of order doesn't matter here
+summary(LM2b)
+```
+
+```{r}
+anova(LM2b) # change of order matters in ANOVA
+```
+
+```{r}
+anova(LM1, LM2) # see if LM2 is significantly better than LM1
+```
+

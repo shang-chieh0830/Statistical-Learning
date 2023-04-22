@@ -12,6 +12,7 @@ jupyter:
     display_name: R
     language: R
     name: ir
+output: pdf_document
 ---
 
 
@@ -22,6 +23,7 @@ In this lab, we perform PCA on the `USArrests` data set, which is part of the ba
 The rows of the data set contain the 50 states, in alphabetical order.
 
 ```{r chunk1}
+attach(USArrests)
 states <- row.names(USArrests)
 states
 ```
@@ -155,7 +157,7 @@ cumsum(a)
 
 
 ## Matrix Completion 
-We now re-create the analysis carried out on the \USArrests\ data in
+We now re-create the analysis carried out on the `USArrests` data in
 Section 12.3. We turn the data frame into a
 matrix, after centering and scaling each column to have mean zero and
 variance one.
@@ -523,7 +525,7 @@ principal component score vectors. This indicates that cell lines from the same 
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\textwidth]{Figures/Chapter12/12_17.pdf} 
+\includegraphics[width=\textwidth]{../data/12_17.pdf} 
 On the whole, observations belonging to a single cancer type tend to lie near each other
 in this low-dimensional space. It would not have been possible to visualize the data without using a dimension reduction method such as PCA, since based on the full data set there are
  $6{,}830 \choose 2$ possible scatterplots, none of which would have
@@ -560,7 +562,7 @@ plot(cumsum(pve), type = "o", ylab = "Cumulative PVE",
 The resulting plots are shown in Figure 12.18.
 \begin{figure}[t]
 \centering
-\includegraphics[width=\textwidth]{Figures/Chapter12/12_18.pdf}
+\includegraphics[width=\textwidth]{../data/12_18.pdf}
 *Right:* the cumulative PVE of the principal components is shown. Together, all principal components explain $100\,\%$ of the variance.}
 \end{figure}
 We see that together,
@@ -597,7 +599,7 @@ plot(hclust(data.dist, method = "single"),
 
 \begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{Figures/Chapter12/12_19.pdf}
+\includegraphics[width=\textwidth]{../data/12_19.pdf}
 as the dissimilarity measure. Complete and average linkage tend to yield
 evenly sized clusters whereas single linkage tends to yield extended clusters to which single leaves are fused one by one.}
 \end{figure}

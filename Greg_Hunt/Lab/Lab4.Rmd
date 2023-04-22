@@ -1,0 +1,423 @@
+---
+jupyter:
+  jupytext:
+    formats: ipynb,Rmd,R
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.2'
+      jupytext_version: 1.9.1
+  kernelspec:
+    display_name: R
+    language: R
+    name: ir
+output: pdf_document
+---
+
+# KNN Regression and Evaluation
+
+```{r}
+library(caret)
+```
+# simulation
+
+```{r}
+x = runif(100,-1,1)
+y = x^2 # f(x) = x^2
+e = rnorm(100,0,1/10)
+y = y + e
+plot(x,y)
+```
+
+```{r}
+df = data.frame(x=x,y=y)
+```
+
+```{r}
+flds = createFolds(1:nrow(df),k=2)
+flds
+```
+
+# test/train split
+
+```{r}
+test_df = df[flds[[1]],]
+train_df = df[flds[[2]],]
+```
+
+```{r}
+dim(test_df)
+dim(train_df)
+```
+
+```{r}
+# build on the testing data
+knn_mod = knnreg(y~.,data=train_df,k=5)
+```
+
+```{r}
+train_preds = predict(knn_mod,train_df)
+```
+
+```{r}
+RMSE_train = sqrt(mean((train_df$y-train_preds)^2))
+RMSE_train
+```
+
+```{r}
+test_preds = predict(knn_mod,test_df)
+```
+
+```{r}
+RMSE_test = sqrt(mean((test_df$y-test_preds)^2))
+RMSE_test
+```
+
+```{r}
+plot(x,y)
+xe = data.frame(x=sort(runif(1000,-1,1)))
+lines(xe$x,predict(knn_mod,xe),col='red')
+lines(xe$x,xe$x^2,col='blue')
+```
+
+notice how the training RMSE is typically loweer than the testing RMSE
+
+# k fold cross validation
+
+```{r}
+flds = createFolds(1:nrow(df),k=5)
+flds
+```
+
+```{r}
+lengths(flds)
+```
+
+```{r}
+i = 1
+test_df = df[flds[[i]],]
+train_df = df[unlist(flds[-i]),]
+```
+
+```{r}
+dim(test_df)
+dim(train_df)
+```
+
+```{r}
+knn_mod = knnreg(y~.,data=train_df,k=10)
+
+train_preds = predict(knn_mod,train_df)
+RMSE_train = sqrt(mean((train_df$y-train_preds)^2))
+
+test_preds = predict(knn_mod,test_df)
+RMSE_test = sqrt(mean((test_df$y-test_preds)^2))
+
+RMSE_train
+RMSE_test
+```
+
+let's put this in a function
+
+```{r}
+tt_split_eval = function(train_idx,test_idx){
+    test_df = df[test_idx,]
+    train_df = df[train_idx,]
+    
+    knn_mod = knnreg(y~.,data=train_df,k=5)
+
+    train_preds = predict(knn_mod,train_df)
+    RMSE_train = sqrt(mean((train_df$y-train_preds)^2))
+
+    test_preds = predict(knn_mod,test_df)
+    RMSE_test = sqrt(mean((test_df$y-test_preds)^2))
+
+    return(data.frame(train=RMSE_train,
+        test=RMSE_test
+                ))
+}
+```
+
+```{r}
+flds = createFolds(1:nrow(df),k=10)
+rmses = lapply(1:length(flds),function(i){
+    tdf = tt_split_eval(train_idx = unlist(flds[-i]),test_idx = flds[[i]])
+    tdf$i = i 
+    return(tdf)
+})
+```
+
+```{r}
+rmses[[1]]
+```
+
+```{r}
+rmses[[2]]
+```
+
+```{r}
+RMSE = Reduce('rbind',rmses)
+```
+
+```{r}
+RMSE
+```
+
+```{r}
+library('reshape2')
+```
+
+```{r}
+mRMSE = reshape2::melt(RMSE,id.vars='i')
+mRMSE
+```
+
+```{r}
+library('ggplot2')
+```
+
+```{r}
+ggplot(data=mRMSE,mapping=aes(x=i,y=value,color=variable))+
+    geom_point()
+```
+
+in total summary we can summarize the RMSEs
+
+```{r}
+median(RMSE$test)
+```
+
+How can we use this to choose a value of $k$ for KNN? Use a train/validate/test 3-way split
+
+```{r}
+flds = createFolds(1:nrow(df),k=10)
+flds
+```
+
+```{r}
+i = 1
+test_idx = flds[[i]]
+trainval_idx = unlist(flds[-i])
+```
+
+```{r}
+test_df = df[test_idx,]
+trainval_df = df[trainval_idx,]
+```
+
+```{r}
+dim(test_df)
+dim(trainval_df)
+```
+
+```{r}
+tv_flds = createFolds(1:nrow(trainval_df),k=10)
+tv_flds
+```
+
+```{r}
+j=1
+val_idx = tv_flds[[j]]
+train_idx = unlist(tv_flds[-j])
+```
+
+```{r}
+train_df = trainval_df[train_idx,]
+val_df = trainval_df[val_idx,]
+```
+
+```{r}
+dim(train_df)
+dim(val_df)
+```
+
+```{r}
+tt_split_eval_k = function(train_idx,val_idx,k=1){
+    train_df = trainval_df[train_idx,]
+    val_df = trainval_df[val_idx,]
+    
+    knn_mod = knnreg(y~.,data=train_df,k=k)
+
+    train_preds = predict(knn_mod,train_df)
+    RMSE_train = sqrt(mean((train_df$y-train_preds)^2))
+
+    val_preds = predict(knn_mod,val_df)
+    RMSE_val = sqrt(mean((val_df$y-val_preds)^2))
+
+    return(data.frame(train=RMSE_train,
+        val=RMSE_val
+                ))
+}
+```
+
+```{r}
+tt_split_eval_k(train_idx,val_idx,k=5)
+```
+
+```{r}
+tt_split_eval_k(train_idx,val_idx,k=10)
+```
+
+```{r}
+RMSE = lapply(1:75,function(k){
+    tdf = tt_split_eval_k(train_idx,val_idx,k=k)
+    tdf$k = k
+    return(tdf)
+})
+RMSE = Reduce('rbind',RMSE)
+head(RMSE)
+```
+
+```{r}
+library(reshape2)
+mRMSE = melt(RMSE,id.vars='k')
+head(mRMSE)
+```
+
+```{r}
+ggplot(data=mRMSE,mapping=aes(x=k,y=value,color=variable))+
+    geom_point()+
+    scale_x_sqrt()
+```
+
+```{r}
+which.min(RMSE$val)
+```
+
+```{r}
+min_df = RMSE[which.min(RMSE$val),]
+min_df
+```
+
+```{r}
+knn_mod = knnreg(y~.,data=trainval_df,k=min_df$k)
+```
+
+```{r}
+test_preds = predict(knn_mod,test_df)
+RMSE_val = sqrt(mean((test_df$y-test_preds)^2))
+RMSE_val
+```
+
+can I do this in a cross validated way? yes use nested cross validation!
+
+```{r}
+# outer loop = split into test and trainval datasets
+# inner loop = MBP, split into train/val and search over k
+
+
+TEST_RMSE = rep(NA,length(flds))
+
+for(i in 1:length(flds)){
+    
+    # split testing from trainval
+    test_idx = flds[[i]]
+    trainval_idx = unlist(flds[-i])
+    test_df = df[test_idx,]
+    trainval_df = df[trainval_idx,]
+     
+    #MODEL BUILDING PROCESS
+    tv_flds = createFolds(1:nrow(trainval_df),k=10)
+    
+    K_seq = seq(1,75)
+    VAL_MTX = array(NA,c(length(tv_flds),length(K_seq)))
+    
+    for(j in 1:length(tv_flds)){
+        
+        val_idx = tv_flds[[j]]
+        train_idx = unlist(tv_flds[-j])
+        train_df = trainval_df[train_idx,]
+        val_df = trainval_df[val_idx,]
+
+        for(k in K_seq){
+            knn_mod = knnreg(y~.,data=train_df,k=k)
+            val_preds = predict(knn_mod,val_df)
+            VAL_MTX[j,k] = sqrt(mean((val_df$y-val_preds)^2))
+        }
+    }
+    
+    VAL_K = apply(VAL_MTX,2,mean)
+    K_hat = K_seq[which.min(VAL_K)]
+    
+    knn_mod = knnreg(y~.,data=trainval_df,k=K_hat)
+    
+    # eval on testing data
+    test_preds = predict(knn_mod,test_df)
+    TEST_RMSE[i] = sqrt(mean((test_df$y-test_preds)^2))
+}
+```
+
+consider for a single run:
+
+```{r}
+ggplot(data=melt(VAL_MTX),mapping=aes(x=Var2,y=value,color=as.factor(Var1)))+geom_point()
+```
+
+```{r}
+plot(VAL_K)
+```
+
+```{r}
+K_hat = K_seq[which.min(VAL_K)]
+K_hat
+```
+
+```{r}
+# overall
+
+TEST_RMSE
+```
+
+```{r}
+mean(TEST_RMSE)
+```
+
+```{r}
+plot(VAL_K)
+abline(h=mean(TEST_RMSE),col='red')
+```
+
+How do we build the final model for prediction? Basically pull out the inner loop
+
+```{r}
+tv_flds = createFolds(1:nrow(df),k=10) # use all df
+    
+K_seq = seq(1,75)
+VAL_MTX = array(NA,c(length(tv_flds),length(K_seq)))
+
+for(j in 1:length(tv_flds)){
+
+    val_idx = tv_flds[[j]]
+    train_idx = unlist(tv_flds[-j])
+    train_df = df[train_idx,]
+    val_df = df[val_idx,]
+
+    for(k in K_seq){
+        knn_mod = knnreg(y~.,data=train_df,k=k)
+        val_preds = predict(knn_mod,val_df)
+        VAL_MTX[j,k] = sqrt(mean((val_df$y-val_preds)^2))
+    }
+}
+
+VAL_K = apply(VAL_MTX,2,mean)
+K_hat = K_seq[which.min(VAL_K)]
+
+# fit with all the data
+knn_mod = knnreg(y~.,data=df,k=K_hat)
+```
+
+```{r}
+plot(VAL_K)
+```
+
+```{r}
+K_hat
+```
+
+```{r}
+plot(x,y)
+xe = data.frame(x=sort(runif(1000,-1,1)))
+lines(xe$x,predict(knn_mod,xe),col='red')
+lines(xe$x,xe$x^2,col='blue')
+```
+
